@@ -16,17 +16,36 @@ rlistToList lst =
 
 -- Реализуйте обратное преобразование
 listToRlist :: [a] -> ReverseList a
-listToRlist = notImplementedYet
+listToRlist = foldl (:<) REmpty
 
 -- Реализуйте все представленные ниже классы (см. тесты)
-instance Show (ReverseList a) where
-    showsPrec = notImplementedYet
-    show = notImplementedYet
-instance Eq (ReverseList a) where
-    (==) = notImplementedYet
-    (/=) = notImplementedYet
+instance Show a => Show (ReverseList a) where
+    show = show . rlistToList
+
+instance Eq a => Eq (ReverseList a) where
+    (==) a b = rlistToList a == rlistToList b
+    -- (/=) = notImplementedYet
+
 instance Semigroup (ReverseList a) where
+    (<>) xs REmpty = xs
+    (<>) xs (ys :< y) = (xs <> ys) :< y
+
 instance Monoid (ReverseList a) where
+    mempty = REmpty
+    mappend = (<>)
+
 instance Functor ReverseList where
+    fmap _ REmpty = REmpty
+    fmap f (xs :< x) = fmap f xs :< f x
+
 instance Applicative ReverseList where
+    pure = (:<) REmpty
+    (<*>) REmpty _ = REmpty
+    (<*>) _ REmpty = REmpty
+    (<*>) (fs :< f) xs = (fs <*> xs) <> fmap f xs
+
 instance Monad ReverseList where
+    return = pure
+    REmpty >>= _ = REmpty
+    (>>=) (xs :< x) f = (xs >>= f) <> f x
+
